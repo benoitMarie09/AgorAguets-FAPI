@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.crud import get_row_by_id, save, delete_row
+from app.crud import save, delete_row, get_row
 from app.schemas import formations as schemas
 from app.models import formations as models
 from sqlalchemy.orm import Session
@@ -30,7 +30,7 @@ def read_all(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @router.get("/{formation_id}", response_model=schemas.FormationRead)
 def read_one(formation_id: int, db: Session = Depends(get_db)):
-    db_formation = get_row_by_id(db, models.Formation, formation_id)
+    db_formation = get_row(db, models.Formation, formation_id)
     return db_formation
 
 
@@ -42,7 +42,7 @@ def delete(formation_id: int, db: Session = Depends(get_db)):
 
 @router.patch("/{formation_id}", response_model=schemas.FormationRead)
 def patch(formation_id: int, formation: schemas.FormationUpdate, db: Session = Depends(get_db)):
-    db_formation = get_row_by_id(db, models.Formation, formation_id)
+    db_formation = get_row(db, models.Formation, formation_id)
     formation_data = formation.dict(exclude_unset=True)
     for key, value in formation_data.items():
         setattr(db_formation, key, value)
@@ -52,7 +52,7 @@ def patch(formation_id: int, formation: schemas.FormationUpdate, db: Session = D
 
 @router.put("/{formation_id}", response_model=schemas.FormationRead)
 def patch(formation_id: int, formation: schemas.FormationUpdate, db: Session = Depends(get_db)):
-    db_formation = get_row_by_id(db, models.Formation, formation_id)
+    db_formation = get_row(db, models.Formation, formation_id)
     for key, value in formation.dict().items():
         setattr(db_formation, key, value)
     save(db, db_formation)
