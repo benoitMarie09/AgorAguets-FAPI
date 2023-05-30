@@ -24,7 +24,7 @@ class ActualityRead(ActualityBase):
 class ActualityUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
-    date: Optional[date] = None
+    date:  Optional[date]
 
     class Config:
         orm_mode = True

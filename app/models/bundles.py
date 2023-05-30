@@ -12,3 +12,7 @@ class Bundle(Base):
     title = Column(String, unique=True, index=True)
     content = Column(String, index=True)
     formations = relationship("Formation", secondary="bundles_formations", back_populates="bundles")
+
+
+class Formation:
+    pass

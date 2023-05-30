@@ -27,7 +27,7 @@ class FormationRead(FormationBase):
     bundles: list[BundleBase] | None = None
 
 
-class ActualityUpdate(BaseModel):
+class FormationUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
     price: Optional[float] = None

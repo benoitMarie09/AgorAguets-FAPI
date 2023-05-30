@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel, validator
 
@@ -30,12 +30,10 @@ class BundleRead(BundleBase):
         return v or sum(formation.price for formation in values['formations'])
 
 
+class BundleUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    formations: Optional[list[int]] = None
 
-
-
-
-
-
-
-
-
+    class Config:
+        orm_mode = True

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
+
+from app.crud import get_row_by_id, save, delete_row
 from app.schemas import formations as schemas
 from app.models import formations as models
 from sqlalchemy.orm import Session
@@ -17,34 +19,41 @@ def create(formation: schemas.FormationCreate, db: Session = Depends(get_db)):
         content=formation.content,
         price=formation.price,
     )
-    db.add(db_formation)
-    db.commit()
-    db.refresh(db_formation)
+    save(db, db_formation)
     return db_formation
 
 
 @router.get("/", response_model=list[schemas.FormationRead])
 def read_all(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    db_formations = db.query(models.Formation).offset(skip).limit(limit).all()
-    if not db_formations:
-        raise HTTPException(status_code=404, detail="No formations where found")
-    return db_formations
+    return db.query(models.Formation).offset(skip).limit(limit).all()
 
 
 @router.get("/{formation_id}", response_model=schemas.FormationRead)
 def read_one(formation_id: int, db: Session = Depends(get_db)):
-    db_formation = db.query(models.Formation).filter(models.Formation.id == formation_id).first()
-    if not db_formation:
-        raise HTTPException(status_code=404, detail="Formation was not found")
+    db_formation = get_row_by_id(db, models.Formation, formation_id)
     return db_formation
 
 
 @router.delete("/{formation_id}")
 def delete(formation_id: int, db: Session = Depends(get_db)):
-    db_formation = db.query(models.Formation).filter(models.Formation.id == formation_id).first()
-    if not db_formation:
-        raise HTTPException(status_code=404, detail="Formation not found")
-    db.delete(db_formation)
-    db.commit()
+    delete_row(db, models.Formation, formation_id)
     return {"Deleted": True}
 
+
+@router.patch("/{formation_id}", response_model=schemas.FormationRead)
+def patch(formation_id: int, formation: schemas.FormationUpdate, db: Session = Depends(get_db)):
+    db_formation = get_row_by_id(db, models.Formation, formation_id)
+    formation_data = formation.dict(exclude_unset=True)
+    for key, value in formation_data.items():
+        setattr(db_formation, key, value)
+    save(db, db_formation)
+    return db_formation
+
+
+@router.put("/{formation_id}", response_model=schemas.FormationRead)
+def patch(formation_id: int, formation: schemas.FormationUpdate, db: Session = Depends(get_db)):
+    db_formation = get_row_by_id(db, models.Formation, formation_id)
+    for key, value in formation.dict().items():
+        setattr(db_formation, key, value)
+    save(db, db_formation)
+    return db_formation
